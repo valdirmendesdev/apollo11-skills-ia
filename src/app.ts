@@ -15,7 +15,7 @@ export function createApp(pool: pg.Pool) {
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ZodError) {
-    res.status(400).json({ error: "invalid request body", issues: err.issues });
+    res.status(400).json({ error: "invalid request", issues: err.issues });
     return;
   }
   console.error(err);

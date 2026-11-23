@@ -2,6 +2,7 @@ import { Router } from "express";
 import type pg from "pg";
 import { z } from "zod";
 import { idempotent } from "../idempotency.js";
+import { parseCustomerId } from "../params.js";
 import { assessRisk } from "../risk.js";
 
 const ChargeInput = z.object({
@@ -13,7 +14,7 @@ export function chargesRouter(pool: pg.Pool) {
   const router = Router();
 
   router.post("/customers/:id/charges", idempotent(pool), async (req, res) => {
-    const customerId = Number(req.params.id);
+    const customerId = parseCustomerId(req.params);
     const input = ChargeInput.parse(req.body);
 
     const risk = await assessRisk({ customerId, amountCents: input.amount_cents });

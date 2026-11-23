@@ -48,4 +48,20 @@ describe("POST /customers/:id/charges", () => {
 
     expect(res.status).toBe(402);
   });
+
+  it("does not replay another customer's charge when they reuse an Idempotency-Key", async () => {
+    const neil = await givenCustomerWithBalance(10_000);
+    const buzz = await givenCustomerWithBalance(10_000);
+
+    await charge(neil, 2_500, "shared-key");
+    const res = await charge(buzz, 1_000, "shared-key");
+
+    expect(res.body).toMatchObject({ customer_id: buzz, balance_after_cents: 9_000 });
+  });
+
+  it("rejects a non-numeric customer id", async () => {
+    const res = await charge(Number.NaN, 1_000, "bad-id");
+
+    expect(res.status).toBe(400);
+  });
 });

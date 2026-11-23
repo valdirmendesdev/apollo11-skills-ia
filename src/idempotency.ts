@@ -8,11 +8,12 @@ import type pg from "pg";
  */
 export function idempotent(pool: pg.Pool): RequestHandler {
   return async (req, res, next) => {
-    const key = req.header("Idempotency-Key");
-    if (!key) {
+    const clientKey = req.header("Idempotency-Key");
+    if (!clientKey) {
       res.status(400).json({ error: "Idempotency-Key header is required" });
       return;
     }
+    const key = `${req.method} ${req.originalUrl} ${clientKey}`;
 
     const stored = await pool.query<{ status_code: number; body: unknown }>(
       "SELECT status_code, body FROM idempotency_keys WHERE key = $1",
@@ -24,7 +25,7 @@ export function idempotent(pool: pg.Pool): RequestHandler {
       return;
     }
 
-    const json = res.json.bind(res);
+    const sendJson = res.json.bind(res);
     res.json = (body: unknown) => {
       if (res.statusCode < 500) {
         pool
@@ -34,10 +35,10 @@ export function idempotent(pool: pg.Pool): RequestHandler {
              ON CONFLICT (key) DO NOTHING`,
             [key, res.statusCode, JSON.stringify(body)],
           )
-          .then(() => json(body), next);
+          .then(() => sendJson(body), next);
         return res;
       }
-      return json(body);
+      return sendJson(body);
     };
 
     next();

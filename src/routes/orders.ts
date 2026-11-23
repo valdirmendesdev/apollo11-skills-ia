@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type pg from "pg";
+import { parseCustomerId } from "../params.js";
 
 type OrderRow = { id: number; status: string; created_at: Date };
 type ItemRow = { product_id: number; product_name: string; quantity: number; unit_price_cents: number };
@@ -28,7 +29,7 @@ export function ordersRouter(pool: pg.Pool) {
   const router = Router();
 
   router.get("/customers/:id/orders", async (req, res) => {
-    const customerId = Number(req.params.id);
+    const customerId = parseCustomerId(req.params);
     const orders = await findOrders(pool, customerId);
 
     const detailed = [];

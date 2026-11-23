@@ -1,4 +1,4 @@
-import { createPool } from "../src/db.js";
+import { createPool, resetData } from "../src/db.js";
 import { migrate } from "./migrate.js";
 
 const CUSTOMERS = 2_000;
@@ -10,9 +10,7 @@ const pool = createPool();
 await migrate(pool);
 
 console.log("resetting data…");
-await pool.query(
-  "TRUNCATE customers, charges, idempotency_keys, products, orders, order_items RESTART IDENTITY CASCADE",
-);
+await resetData(pool);
 
 console.log(`seeding ${CUSTOMERS} customers, ${PRODUCTS} products, ${ORDERS} orders…`);
 await pool.query(
