@@ -10,7 +10,9 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "demo:charges": "tsx scripts/demo-charges.ts",
+    "demo:orders": "tsx scripts/demo-orders.ts"
   },
   "dependencies": {
     "express": "^5.3.0",

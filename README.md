@@ -26,6 +26,15 @@ curl -X POST localhost:3000/customers/7/charges \
 curl localhost:3000/customers/42/orders
 ```
 
+## Demos
+
+```bash
+npm run demo:charges        # envia a mesma cobrança duas vezes com a mesma Idempotency-Key
+npm run demo:orders [id]    # mede o tempo de resposta do histórico de pedidos (padrão: cliente 42)
+```
+
+Ambos sobem o app no próprio processo e usam o banco populado pelo `db:seed`.
+
 ## Testes
 
 ```bash
