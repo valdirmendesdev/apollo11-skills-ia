@@ -1,43 +1,15 @@
-# apollo11-ia
+# apollo11-ia — API de empréstimo de livros
 
-API Express + TypeScript + Postgres usada em demonstrações.
+Spec: `.scratch/book-lending/spec.md` · Vocabulário: `GLOSSARY.md` · Decisões: `docs/adr/`.
 
-## Endpoints
-
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `POST` | `/customers/:id/charges` | Debita um valor do saldo do cliente. Exige o header `Idempotency-Key` para retentativas seguras. Body: `{ "amount_cents": 2500, "description": "..." }` |
-| `GET` | `/customers/:id/orders` | Histórico de pedidos do cliente com itens, total por pedido e total gasto. |
-
-## Rodando
-
-```bash
+```sh
 npm install
-npm run db:up      # Postgres 17 via docker compose (porta 5544)
-npm run db:seed    # schema + massa de dados (2k clientes, 400k pedidos, 2M itens)
-npm run dev        # http://localhost:3000
-```
-
-```bash
-curl -X POST localhost:3000/customers/7/charges \
-  -H 'Idempotency-Key: 6f1c...' -H 'Content-Type: application/json' \
-  -d '{"amount_cents": 2500}'
-
-curl localhost:3000/customers/42/orders
-```
-
-## Demos
-
-```bash
-npm run demo:charges        # envia a mesma cobrança duas vezes com a mesma Idempotency-Key
-npm run demo:orders [id]    # mede o tempo de resposta do histórico de pedidos (padrão: cliente 42)
-```
-
-Ambos sobem o app no próprio processo e usam o banco populado pelo `db:seed`.
-
-## Testes
-
-```bash
+npm run db:up        # Postgres 17 em docker (localhost:5544)
+npm run db:migrate   # aplica db/migrations/*.sql pendentes
+JWT_SECRET=dev-secret-at-least-32-bytes-long!! npm run dev
 npm run typecheck
-npm test           # integração contra o Postgres do docker compose (banco apollo_test)
+npm test             # recria o banco apollo_test e roda os testes de integração
 ```
+
+Variáveis: `DATABASE_URL` (pool `primary`), `READ_DATABASE_URL` (pool `read`, padrão = `DATABASE_URL`),
+`JWT_SECRET` (HS256; o `sub` do token é o id do Usuário), `PORT`.

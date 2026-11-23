@@ -1,23 +1,22 @@
-import express, { type ErrorRequestHandler } from "express";
-import { ZodError } from "zod";
+import express from "express";
 import type pg from "pg";
-import { chargesRouter } from "./routes/charges.js";
-import { ordersRouter } from "./routes/orders.js";
+import type { AuthConfig } from "./auth.js";
+import type { Clock } from "./clock.js";
+import { problemHandler, routeNotFound } from "./problems.js";
+import { usersRouter } from "./users/routes.js";
 
-export function createApp(pool: pg.Pool) {
+export type AppDeps = {
+  primary: pg.Pool;
+  read: pg.Pool;
+  clock: Clock;
+  auth: AuthConfig;
+};
+
+export function createApp(deps: AppDeps) {
   const app = express();
   app.use(express.json());
-  app.use(chargesRouter(pool));
-  app.use(ordersRouter(pool));
-  app.use(errorHandler);
+  app.use(usersRouter(deps));
+  app.use(routeNotFound);
+  app.use(problemHandler);
   return app;
 }
-
-const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-  if (err instanceof ZodError) {
-    res.status(400).json({ error: "invalid request", issues: err.issues });
-    return;
-  }
-  console.error(err);
-  res.status(500).json({ error: "internal error" });
-};
